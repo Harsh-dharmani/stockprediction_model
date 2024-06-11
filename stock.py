@@ -4,6 +4,7 @@ import yfinance as yf
 from tensorflow.keras.models import load_model
 import streamlit as st
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
 
 # Load the model
 model = load_model("Stock prediction model.keras")
@@ -22,7 +23,6 @@ st.write(data)
 data_train = pd.DataFrame(data.Close[0: int(len(data) * 0.80)])
 data_test = pd.DataFrame(data.Close[int(len(data) * 0.80): len(data)])
 
-from sklearn.preprocessing import MinMaxScaler
 scaler = MinMaxScaler(feature_range=(0, 1))
 
 p_100_days = data_train.tail(100)
@@ -56,16 +56,17 @@ predict = model.predict(x)
 
 scale = 1 / scaler.scale_[0]
 
-# Correct the typo in 'predict'
 predict = predict * scale
 y_true = y_true * scale
 
-# Plot the predicted and true values
-plt.figure(figsize=(10, 6))
-plt.plot(y_true, label='True Values')
-plt.plot(predict, label='Predicted Values')
-plt.xlabel('Time')
-plt.ylabel('Scaled Value')
-plt.title('True vs Predicted Values')
-plt.legend()
-st.pyplot()
+# Plot the predicted and true values using explicit figure
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.plot(y_true, label='True Values')
+ax.plot(predict, label='Predicted Values')
+ax.set_xlabel('Time')
+ax.set_ylabel('Scaled Value')
+ax.set_title('True vs Predicted Values')
+ax.legend()
+
+# Use st.pyplot with the figure object
+st.pyplot(fig)
